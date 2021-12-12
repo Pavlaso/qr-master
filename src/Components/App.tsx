@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import qrcode from 'qrcode'
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Button, Tab, Tabs, TextField} from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
-
-
+import QRCode from 'qrcode.react'
+import { HexColorPicker } from "react-colorful";
 //@ts-ignore
 import qrlogo from '../assets/qrlogo.png'
 //@ts-ignore
-import defaultQR from '../assets/default-qr.png'
+import reactLogo from '../assets/react-js.svg'
+//@ts-ignore
+import scan from '../assets/qrScan.png'
+
 import { Info } from './Info';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 
@@ -17,20 +19,52 @@ type dataType = {
     code: string
 }
 
-export const App = () => {
-    const [url, srtUrl] = useState('')
-    const [$data, $setData] = useState('')
-    const [value, setValue] = React.useState(0);
 
-    useEffect(() => {
-        if($data.length >= 150) return alert(`You have exceeded the number of characters remove ${$data.length-149} characters`)
-        qrcode.toDataURL($data).then((data: string) => srtUrl(data))
-    }, [$data])
+
+export const App = () => {
+    const qrRef = React.useRef();
+    const [url, setUrl] = useState('Look who it is!')
+    const [value, setValue] = useState(0);
+    const [fgColor, setFgColor] = useState("#000000");
+    const [activeFgColor, setActiveFgColor] = useState(false)
+    const [activeLogo, setActiveLogo] = useState(false)
     
     const handleChange = (e: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
         console.log(newValue)
     };
+
+
+    const downloadQRCode = (evt: React.FormEvent) => {
+        evt.preventDefault();
+        // @ts-ignore
+        let canvas = qrRef.current.querySelector("canvas");
+        let image = canvas.toDataURL("image/png");
+        let anchor = document.createElement("a");
+        anchor.href = image;
+        anchor.download = `qr-code.png`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        setUrl("");
+      };
+    const qrCode = (
+        <QRCode
+          id="qrCodeElToRender"
+          size={290}
+          value={url}
+          bgColor="white"
+          fgColor={fgColor}
+          level="H"
+          imageSettings={activeLogo && {
+            src: scan,
+            excavate: true,
+            width: 800 * 0.1,
+            height: 800 * 0.1,
+          }}
+        />
+      );
+
     return <div>
         <div className="header">
             <div className="container">
@@ -50,17 +84,27 @@ export const App = () => {
                         <Tab label="WiFI" />
                         <Tab label="pdf" /> */}
                     </Tabs>
-                {value === 0 && <LinkComponent $setData={$setData}/>} 
-                {value === 1 && <TextComponent $setData={$setData}/>} 
-                {value === 2 && <PhoneComponent $setData={$setData}/>} 
+                {value === 0 && <LinkComponent setUrl={setUrl}/>} 
+                {value === 1 && <TextComponent setUrl={setUrl}/>} 
+                {value === 2 && <PhoneComponent setUrl={setUrl}/>} 
                 
                 </div>
                 <div className='mine'>
-                    {
-                        //<div><a href={$data}>Перейдти</a></div>
-                    }
-                    <img className="mine__qr" src={!url ? defaultQR : url} alt="qrcode" />
-                    <div className="mine__qr-download"><a href={url} download> <Button color="primary" startIcon={<SaveIcon />} variant="contained"> Save </Button></a></div>
+                    <div className="qr-container__qr-code" ref={qrRef}>
+                        {qrCode}
+                    </div>
+                    <div className="mine__qr-buttons">
+                        <Button variant="contained" size="small" onClick={() => setActiveFgColor(prev => !prev)}>Edit Color</Button>
+                        <div className="mine__qr-download">
+                            <a href={url} download> 
+                                <Button className="mine__download" color="primary" startIcon={<SaveIcon />} variant="contained" size="medium" onClick={downloadQRCode}> 
+                                    Save 
+                                </Button>
+                            </a>
+                        </div>
+                        <Button variant="contained" size="small" onClick={() => setActiveLogo(prev => !prev)}>Add Logo</Button>
+                    </div>
+                    {activeFgColor && <HexColorPicker className="mine__colors" color={fgColor} onChange={setFgColor} />}            
                 </div>
             </div>
            <Info />
@@ -68,11 +112,11 @@ export const App = () => {
     </div>
 }
 
-export const LinkComponent = ({$setData}) => {
+export const LinkComponent = ({setUrl}) => {
     const { register, handleSubmit } = useForm();
     const onSubmit: SubmitHandler<dataType> = (data) => {
         const text = data.code
-        $setData(text) 
+        setUrl(text) 
     }
     return <form className="settings__form" onSubmit={handleSubmit(onSubmit)}>
     <div className="settings__form-cont">
@@ -85,11 +129,11 @@ export const LinkComponent = ({$setData}) => {
 </form>
 }
 
-export const TextComponent = ({$setData}) => {
+export const TextComponent = ({setUrl}) => {
     const { register, handleSubmit } = useForm();
     const onSubmit: SubmitHandler<dataType> = (data) => {
         const text = data.code
-        $setData(text) 
+        setUrl(text) 
     }
     return <form className="settings__form" onSubmit={handleSubmit(onSubmit)}>
     <div className="settings__form-cont">
@@ -107,11 +151,11 @@ const normalizePhoneNumber = (value) => {
     if (!phoneNumber)return value
     return phoneNumber.formatInternational()
 }
-export const PhoneComponent = ({$setData}) => {
+export const PhoneComponent = ({setUrl}) => {
     const { register, handleSubmit } = useForm();
     const onSubmit: SubmitHandler<dataType> = (data) => {
         const text = data.code
-        $setData(text) 
+        setUrl(text) 
     }
     return <>
     <form className="settings__form" onSubmit={handleSubmit(onSubmit)}>
