@@ -65,7 +65,6 @@ module.exports = {
         port: 4200,
         hot: isDev
     },
-    devtool: isDev ? 'source-map' : '',
     plugins: [
         new HtmlWebpackPlugin({ 
             template: path.resolve(__dirname, './src/template.html'),
@@ -79,7 +78,11 @@ module.exports = {
                { 
                    from: path.resolve(__dirname, './src/favicon.ico'), 
                    to: path.resolve(__dirname, 'dist/favicon.ico') 
-               }
+               },
+               { 
+                from: path.resolve(__dirname, './.gitignore'), 
+                to: path.resolve(__dirname, 'dist/.gitignore') 
+            }
            ] 
        }),
        new MiniCssWebpackPlugin({ 

@@ -9,8 +9,8 @@
     "watch": "cross-env NODE_ENV=development webpack --mode development --watch",
     "build": "cross-env NODE_ENV=production  webpack --mode production",
     "start": "cross-env NODE_ENV=development webpack-dev-server --mode development --open --hot",
-    "deploy": "gh-pages -d build",
-    "predeploy": "yarn run build"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist/"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
