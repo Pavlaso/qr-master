@@ -1,0 +1,28 @@
+@media (max-width: 1060px) {
+    .info{
+        &__bottom-cont{
+            display: block;
+        }
+        &__bottom-img {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        &__what-is-qr {
+            display: block;
+        }
+    }
+    .image {
+        width: 100%;
+    }
+   
+}
+@media (max-width: 768px) {
+    .body {
+        display: block;
+    }
+    .mine {
+        width: 100%;
+        height: 100%;
+        padding-bottom: 20px
+    }
+}
